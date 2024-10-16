@@ -44,15 +44,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Check out repository
+    - name: Check out the repository
       uses: actions/checkout@v3
 
-    - name: Use Node.js
+    - name: Using Node.js
       uses: actions/setup-node@v3
       with:
         node-version: ${{ env.NODE_VERSION }}
 
-    - name: Cache node modules
+    - name: Caching node modules
       uses: actions/cache@v4
       with:
         path: '**/node_modules'
@@ -65,7 +65,7 @@ jobs:
         cd frontend
         npm ci
 
-    - name: Run Test
+    - name: Test Job
       run: |
         cd frontend
         npm run test
@@ -75,15 +75,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Check out repository
+    - name: Check out the repository
       uses: actions/checkout@v3
 
-    - name: Use Node.js
+    - name: Using Node.js
       uses: actions/setup-node@v3
       with:
         node-version: ${{ env.NODE_VERSION }}
 
-    - name: Cache node modules
+    - name: Caching node modules
       uses: actions/cache@v4
       with:
         path: '**/node_modules'
@@ -96,7 +96,7 @@ jobs:
         cd frontend
         npm ci
 
-    - name: Run Build
+    - name: Build Job
       run: |
         cd frontend
         export REACT_APP_MOVIE_API_URL=http://localhost:5000

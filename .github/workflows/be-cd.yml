@@ -21,7 +21,7 @@ jobs:
       with:
         python-version: ${{ env.PYTHON_VERSION }}
 
-    - name: Install Pip virtual environment
+    - name: Install Pipenv
       run: |
         cd backend
         pip install pipenv
@@ -40,15 +40,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Check out repository
+    - name: Check out the repository
       uses: actions/checkout@v4
 
-    - name: Use Python
+    - name: Using Python
       uses: actions/setup-python@v5
       with:
         python-version: ${{ env.PYTHON_VERSION }}
 
-    - name: Install Pip virtual environment
+    - name: Install Pipenv
       run: |
         cd backend
         pip install pipenv
@@ -58,7 +58,7 @@ jobs:
         cd backend
         pipenv install --dev
 
-    - name: Run Test
+    - name: Test Job
       run: |
         cd backend
         pipenv run pytest
@@ -76,7 +76,7 @@ jobs:
       with:
         python-version: ${{ env.PYTHON_VERSION }}
 
-    - name: Install Pip virtual environment
+    - name: Install Pipenv
       run: |
         cd backend
         pip install pipenv
