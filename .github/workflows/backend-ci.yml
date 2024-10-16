@@ -10,7 +10,7 @@ env:
   PYTHON_VERSION: '3.10'
 
 jobs:
-  lint-job:
+  linting-action:
     runs-on: ubuntu-latest
 
     steps:
@@ -37,7 +37,7 @@ jobs:
         cd backend
         pipenv run flake8 .
   
-  test-job:
+  testing-action:
     runs-on: ubuntu-latest
 
     steps:
@@ -64,8 +64,8 @@ jobs:
         cd backend
         pipenv run pytest
 
-  build-job:
-    needs: [lint-job, test-job]
+  building-action:
+    needs: [linting-action, testing-action]
     runs-on: ubuntu-latest
 
     steps:

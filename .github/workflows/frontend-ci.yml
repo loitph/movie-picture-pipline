@@ -10,7 +10,7 @@ env:
   NODE_VERSION: '18.x'
 
 jobs:
-  lint-job:
+  linting-action:
     runs-on: ubuntu-latest
 
     steps:
@@ -40,7 +40,7 @@ jobs:
         cd frontend
         npm run lint
 
-  test-job:
+  testing-action:
     runs-on: ubuntu-latest
 
     steps:
@@ -70,8 +70,8 @@ jobs:
         cd frontend
         npm run test
 
-  build-job:
-    needs: [lint-job, test-job]
+  building-action:
+    needs: [linting-action, testing-action]
     runs-on: ubuntu-latest
 
     steps:
