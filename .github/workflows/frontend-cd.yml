@@ -27,9 +27,8 @@ jobs:
       with:
         path: '**/node_modules'
         key: ${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
-        restore-keys: |
-            ${{ runner.os }}-node-
-            
+        restore-keys: ${{ runner.os }}-node-
+
     - name: Install dependencies
       run: |
         cd frontend
@@ -57,8 +56,7 @@ jobs:
       with:
         path: '**/node_modules'
         key: ${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
-        restore-keys: |
-            ${{ runner.os }}-node-
+        restore-keys: ${{ runner.os }}-node-
 
     - name: Install dependencies
       run: |
@@ -108,41 +106,38 @@ jobs:
         REACT_APP_MOVIE_API_URL="http://$REACT_APP_MOVIE_API_URL"
         docker build --build-arg=REACT_APP_MOVIE_API_URL -t $REPOSITORY:$IMAGE_TAG .
 
-    - name: Configure AWS Credentials
+    - name: Apply AWS Credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
+        aws-region: ${{ secrets.AWS_REGION }}
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-        aws-region: ${{ secrets.AWS_REGION }}
 
-    - name: Login to Amazon ECR
+    - name: Login ECR
       uses: aws-actions/amazon-ecr-login@v2
 
-    - name: Get images
-      run: docker images
-
-    - name: Tag image
+    - name: Docker Tag Image
       env:
         REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
         REPOSITORY: frontend-movie-picture
         IMAGE_TAG: latest
       run: docker tag $REPOSITORY:$IMAGE_TAG $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
-    - name: Push docker image to Amazon ECR
+    - name: Pusing Image to ECR
       env:
         REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
         REPOSITORY: frontend-movie-picture
         IMAGE_TAG: latest
       run: docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
-    - name: Config for EKS cluster
+    - name: Connect EKS Cluster
       env:
         REGION: ${{ secrets.AWS_REGION }}
         CLUSTER_NAME: movie-picture-cluster
       run: aws eks update-kubeconfig --region $REGION --name $CLUSTER_NAME
 
-    - name: Update image
+    - name: Adjust Image
       env:
         REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
         REPOSITORY: frontend-movie-picture
@@ -151,7 +146,7 @@ jobs:
         cd frontend/k8s
         kustomize edit set image $REPOSITORY=$REGISTRY/$REPOSITORY:$IMAGE_TAG
 
-    - name: Deploy application to EKS cluster
+    - name: Deploying to EKS Cluster
       run: |
         cd frontend/k8s
         kustomize build | kubectl apply -f -

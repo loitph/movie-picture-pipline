@@ -86,59 +86,55 @@ jobs:
         cd backend
         pipenv install --dev
 
-    - name: Build
+    - name: Build Job
       env:
-        REPOSITORY: backend-movie-picture
         IMAGE_TAG: latest
+        REPOSITORY: backend-movie-picture
       run: |
         cd backend
         docker build -t $REPOSITORY .
 
-    - name: Configure AWS Credentials
+    - name: Apply AWS Credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
+        aws-region: ${{ secrets.AWS_REGION }}
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-        aws-region: ${{ secrets.AWS_REGION }}
 
-    - name: Login to Amazon ECR
+    - name: Login ECR
       uses: aws-actions/amazon-ecr-login@v2
 
-    - name: Get images
-      run: docker images
-
-    - name: Tag image
+    - name: Docker Tag Image
       env:
-        REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
-        REPOSITORY: backend-movie-picture
         IMAGE_TAG: latest
+        REPOSITORY: backend-movie-picture
+        REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
       run: docker tag $REPOSITORY:$IMAGE_TAG $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
-    - name: Push docker image to Amazon ECR
+    - name: Pusing Image to ECR
       env:
+        IMAGE_TAG: latest
         REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
         REPOSITORY: backend-movie-picture
-        IMAGE_TAG: latest
       run: docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
-    - name: Config for EKS cluster
+    - name: Connect EKS Cluster
       env:
-        REGION: ${{ secrets.AWS_REGION }}
         CLUSTER_NAME: movie-picture-cluster
-      run: |
-        aws eks update-kubeconfig --region $REGION --name $CLUSTER_NAME
+        REGION: ${{ secrets.AWS_REGION }}
+      run: aws eks update-kubeconfig --region $REGION --name $CLUSTER_NAME
 
-    - name: Update image
+    - name: Adjust Image
       env:
+        IMAGE_TAG: latest
         REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
         REPOSITORY: backend-movie-picture
-        IMAGE_TAG: latest
       run: |
         cd backend/k8s
         kustomize edit set image $REPOSITORY=$REGISTRY/$REPOSITORY:$IMAGE_TAG
 
-    - name: Deploy application to EKS cluster
+    - name: Deploying to EKS Cluster
       run: |
         cd backend/k8s
         kustomize build | kubectl apply -f -
